@@ -1,0 +1,7 @@
+@DebunkThis_HostAddress = http://localhost:3000
+@video_id = 9bZkp7q19f0
+
+GET {{DebunkThis_HostAddress}}/api/synthesize/{{video_id}}/transcript
+Accept: application/json
+
+###
