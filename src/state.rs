@@ -1,5 +1,5 @@
+use crate::settings::Settings;
 
-
-struct AppState {
-    
+pub struct AppState {
+    pub settings: Settings
 }
