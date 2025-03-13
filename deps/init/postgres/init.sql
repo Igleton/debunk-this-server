@@ -1,0 +1,1 @@
+CREATE DATABASE debunk_this;
