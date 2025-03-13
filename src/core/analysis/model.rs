@@ -1,7 +1,6 @@
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-/// USELESS FOR NOW
 #[derive(Debug, Deserialize, JsonSchema, Serialize)]
 /// A record representing an analysis
 pub struct VideoAnalysis {

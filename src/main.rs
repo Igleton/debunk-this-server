@@ -1,7 +1,10 @@
+use crate::core::analysis::analyzer::VideoAnalyzer;
+use crate::core::analysis::model::VideoAnalysis;
 use crate::settings::Settings;
 use crate::state::AppState;
 use axum::{Extension, Router};
 use config::Config;
+use rig::providers::deepseek;
 use std::env;
 use std::sync::Arc;
 
@@ -19,7 +22,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     .build()?
     .try_deserialize::<Settings>()?;
 
-    let shared_state = Arc::new(AppState { settings });
+    let shared_state = Arc::new(AppState {
+        settings: settings.clone(),
+        analyzer: VideoAnalyzer::new(
+            &settings.deepseek.api_key,
+            &settings.deepseek.api_endpoint,
+            &settings.websearch.tavily_key
+        ),
+    });
     let app = Router::new()
         .nest("/api", api::api::router())
         .layer(Extension(shared_state));
