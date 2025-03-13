@@ -5,3 +5,5 @@ GET {{DebunkThis_HostAddress}}/api/synthesize/{{video_id}}/transcript
 Accept: application/json
 
 ###
+GET {{DebunkThis_HostAddress}}/api/synthesize/{{video_id}}
+Accept: application/json
