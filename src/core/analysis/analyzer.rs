@@ -1,11 +1,7 @@
-use crate::core::analysis::model::VideoAnalysis;
 use crate::core::transcript::base::TranscriptPart;
 use anyhow::anyhow;
-use rig::agent::Agent;
 use rig::completion::Prompt;
-use rig::extractor::Extractor;
 use rig::providers::deepseek;
-use rig::providers::deepseek::DeepSeekCompletionModel;
 
 pub struct VideoAnalyzer {
     client: deepseek::Client,
@@ -22,18 +18,24 @@ impl VideoAnalyzer {
             model_name: model_name.unwrap_or(deepseek::DEEPSEEK_REASONER.to_string()),
         }
     }
-    
+
     pub async fn analyze(
         &self,
-        content: Vec<TranscriptPart>,
+        prompt: String,
+        transcripts: Vec<TranscriptPart>,
+        video_name: String,
+        video_description: String,
+        video_channel_name: String,
     ) -> Result<String, anyhow::Error> {
         match self.client
             .agent(self.model_name.as_str())
+            .preamble(prompt.as_str())
+            .context(format!("VIDEO NAME: {video_name}").as_str())
+            .context(format!("VIDEO DESCRIPTION: {video_description}").as_str())
+            .context(format!("VIDEO CHANNEL: {video_channel_name}").as_str())
             // .tool(Websearch::new(self.tavily_api_key.clone()))
-            // .extractor::<VideoAnalysis>("")
-            .preamble("You are a video analysis expert")
             .build()
-            .prompt(content
+            .prompt(transcripts
                 .iter()
                 .map(|t| t.text.to_owned())
                 .collect::<String>()

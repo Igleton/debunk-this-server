@@ -5,6 +5,7 @@ use crate::state::AppState;
 use axum::{Extension, Router};
 use config::Config;
 use rig::providers::deepseek;
+use sqlx::postgres::PgPoolOptions;
 use std::env;
 use std::sync::Arc;
 
@@ -28,8 +29,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             &settings.deepseek.api_key,
             &settings.deepseek.api_endpoint,
             &settings.websearch.tavily_key,
-            settings.deepseek.model_name
+            settings.deepseek.model_name,
         ),
+        pool: PgPoolOptions::new()
+            .max_connections(5)
+            .connect(settings.database.connection_string.as_str())
+            .await?,
     });
     let app = Router::new()
         .nest("/api", api::api::router())
