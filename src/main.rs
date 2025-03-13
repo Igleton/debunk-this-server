@@ -27,7 +27,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         analyzer: VideoAnalyzer::new(
             &settings.deepseek.api_key,
             &settings.deepseek.api_endpoint,
-            &settings.websearch.tavily_key
+            &settings.websearch.tavily_key,
+            settings.deepseek.model_name
         ),
     });
     let app = Router::new()
