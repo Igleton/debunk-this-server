@@ -13,6 +13,7 @@ pub fn router() -> axum::Router {
         .route("/{video_id}/transcript", get(transcript))
 }
 
+#[tracing::instrument(skip(state))]
 async fn synthesize(
     Path(video_id): Path<String>,
     Extension(state): Extension<Arc<AppState>>,
@@ -30,6 +31,7 @@ async fn synthesize(
     }
 }
 
+#[tracing::instrument]
 async fn transcript(Path(video_id): Path<String>) -> Json<Vec<TranscriptPart>> {
     get_youtube_video_transcript(video_id.as_str(), None)
         .await
