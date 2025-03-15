@@ -1,11 +1,8 @@
 use crate::core::analysis::analyzer::VideoAnalyzer;
-use crate::core::analysis::model::VideoAnalysis;
-use crate::settings::Settings;
+use crate::settings::get_settings;
 use crate::state::AppState;
 use axum::{Extension, Router};
-use config::Config;
-use rig::providers::deepseek;
-use std::env;
+use sqlx::postgres::PgPoolOptions;
 use std::sync::Arc;
 
 mod api;
@@ -15,20 +12,22 @@ mod state;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let settings = match env::var("PROFILE").unwrap_or("local".to_string()).as_str() {
-        "local" => Config::builder().add_source(config::File::with_name("Settings.toml")),
-        _ => Config::builder().add_source(config::Environment::with_prefix("APP_")),
-    }
-    .build()?
-    .try_deserialize::<Settings>()?;
+    let settings = get_settings()?;
 
+    let pool = PgPoolOptions::new()
+        .max_connections(5)
+        .connect(settings.database.connection_string.as_str())
+        .await?;
     let shared_state = Arc::new(AppState {
         settings: settings.clone(),
         analyzer: VideoAnalyzer::new(
             &settings.deepseek.api_key,
             &settings.deepseek.api_endpoint,
-            &settings.websearch.tavily_key
+            &settings.websearch.tavily_key,
+            settings.deepseek.model_name,
         ),
+        pool: pool.clone(),
+        prompts: core::prompt::PromptRepository::new(pool.clone()),
     });
     let app = Router::new()
         .nest("/api", api::api::router())

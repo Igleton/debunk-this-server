@@ -1,0 +1,5 @@
+version: 3
+
+tasks:
+  migrate-local:
+    cmd: cargo run --package debunk-this --bin migrate

@@ -4,7 +4,12 @@ use axum::response::{IntoResponse, Response};
 #[derive(Debug, thiserror::Error)]
 #[error("Api Error")]
 pub enum ApiError {
-    Anyhow(#[from] anyhow::Error)
+    Anyhow(#[from] anyhow::Error),
+    
+    #[error("Processing error: {0}")]
+    ProcessingError(String),
+    
+    DatabaseAccessError(#[from] sqlx::Error)
 }
 
 impl IntoResponse for ApiError {
