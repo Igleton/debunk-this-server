@@ -15,16 +15,12 @@ thiserror = "2.0.12"
 anyhow = "1.0.97"
 config = "0.15.11"
 reqwest = { version = "0.12.14", features = ["json"] }
-refinery = { version = "0.8.16", features = ["postgres"] }
 sqlx = { version = "0.8.3", features = ["chrono", "postgres", "runtime-tokio"] }
 rustypipe = "0.11.0"
 url = "2.5.4"
 chrono = "0.4.40"
-
-[[bin]]
-name = "migrate"
-path = "src/migrate.rs"
-
-[[bin]]
-name = "debunk_this"
-path = "src/main.rs"
+shuttle-runtime = "0.53.0"
+shuttle-shared-db = { version = "0.53.0", features = ["postgres", "sqlx"] }
+tracing = "0.1.41"
+tracing-subscriber = "0.3.19"
+shuttle-axum = "0.53.0"

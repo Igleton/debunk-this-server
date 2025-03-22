@@ -2,7 +2,6 @@ use crate::core::analysis::analyzer::VideoAnalyzer;
 use crate::settings::get_settings;
 use crate::state::AppState;
 use axum::{Extension, Router};
-use sqlx::postgres::PgPoolOptions;
 use std::sync::Arc;
 
 mod api;
@@ -10,14 +9,21 @@ mod core;
 mod settings;
 mod state;
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+#[shuttle_runtime::main]
+async fn main(
+    #[shuttle_runtime::Secrets] secrets: shuttle_runtime::SecretStore,
+    #[shuttle_shared_db::Postgres(
+        local_uri = "postgres://postgres:postgres@localhost:5432/debunk_this"
+    )] conn_string: String,
+) -> shuttle_axum::ShuttleAxum {
+    secrets.into_iter().for_each(|(key, val)| unsafe {
+        std::env::set_var(key, val);
+    });
+
     let settings = get_settings()?;
 
-    let pool = PgPoolOptions::new()
-        .max_connections(5)
-        .connect(settings.database.connection_string.as_str())
-        .await?;
+    let pool = sqlx::PgPool::connect(&conn_string).await.unwrap();
+    sqlx::migrate!("db/migrations").run(&pool).await.expect("Failed to run db migrations");
     let shared_state = Arc::new(AppState {
         settings: settings.clone(),
         analyzer: VideoAnalyzer::new(
@@ -33,8 +39,5 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .nest("/api", api::api::router())
         .layer(Extension(shared_state));
 
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
-    axum::serve(listener, app).await.unwrap();
-
-    Ok(())
+    Ok(app.into())
 }
