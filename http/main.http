@@ -1,9 +1,18 @@
-@DebunkThis_HostAddress = http://localhost:3000
+@DebunkThis_HostAddress = http://localhost:8000
 @video_id = CINrLeFJBu4
 
 GET {{DebunkThis_HostAddress}}/api/synthesize/{{video_id}}/transcript
 Accept: application/json
 
 ###
-GET {{DebunkThis_HostAddress}}/api/synthesize/{{video_id}}
+POST {{DebunkThis_HostAddress}}/api/synthesize/{{video_id}}
 Accept: application/json
+
+###
+POST {{DebunkThis_HostAddress}}/api/prompts
+Content-Type: application/json
+
+{
+    "name": "video_analysis",
+    "prompt": "Tu es un expert en rhétorique et analyse du discours. Ton objectif est de comprendre et d'analyser des retranscriptions de vidéos youtubes (souvent politiques) et d'en émettre une critique objective. Identifie les éventuels biais, pointe les éventuelles erreurs, soulève également les bons points de la vidéo. Reste le plus factuel possible en citant les passages (transcripts) qui appuient ce que tu dis. Produis une conclusion qui résume l'ensemble de ta réflexion."
+}

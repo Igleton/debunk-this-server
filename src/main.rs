@@ -3,6 +3,7 @@ use crate::settings::get_settings;
 use crate::state::AppState;
 use axum::{Extension, Router};
 use std::sync::Arc;
+use tracing::{error, info};
 
 mod api;
 mod core;
@@ -27,13 +28,15 @@ async fn main(
     let shared_state = Arc::new(AppState {
         settings: settings.clone(),
         analyzer: VideoAnalyzer::new(
-            &settings.deepseek.api_key,
-            &settings.deepseek.api_endpoint,
-            &settings.websearch.tavily_key,
-            settings.deepseek.model_name,
+            &settings.deepseek_api_key,
+            &settings.deepseek_api_endpoint,
+            &settings.websearch_tavily_key,
+            settings.deepseek_model_name,
         ),
         pool: pool.clone(),
         prompts: core::prompt::PromptRepository::new(pool.clone()),
+        syntheses: core::video_synthesis::VideoSynthesisRepository::new(pool.clone()),
+        videos: core::video_repository::VideoRepository::new(pool.clone()),
     });
     let app = Router::new()
         .nest("/api", api::api::router())

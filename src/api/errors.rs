@@ -1,3 +1,4 @@
+use std::error::Error;
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 
@@ -16,7 +17,7 @@ impl IntoResponse for ApiError {
     fn into_response(self) -> Response {
         (
             StatusCode::INTERNAL_SERVER_ERROR,
-            format!("Something went wrong: {}", self.to_string()),
+            format!("Something went wrong: {}", self.source().unwrap().to_string()),
         )
             .into_response()
     }

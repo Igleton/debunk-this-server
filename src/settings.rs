@@ -1,33 +1,21 @@
+use config::Case;
 use serde::Deserialize;
-use std::env;
+use tracing::{debug, info};
 
-#[derive(Deserialize, Clone)]
-pub struct DeepSeekSettings {
-    pub api_endpoint: String,
-    pub api_key: String,
-    pub model_name: Option<String>,
-}
-
-#[derive(Deserialize, Clone)]
-pub struct WebsearchSettings {
-    pub tavily_key: String,
-}
 
 #[derive(Deserialize, Clone)]
 pub struct Settings {
-    pub deepseek: DeepSeekSettings,
-    pub websearch: WebsearchSettings,
+    pub deepseek_api_endpoint: String,
+    pub deepseek_api_key: String,
+    pub deepseek_model_name: Option<String>,
+    pub websearch_tavily_key: String,
 }
 
 pub fn get_settings() -> Result<Settings, anyhow::Error> {
-    Ok(
-        match env::var("PROFILE").unwrap_or("local".to_string()).as_str() {
-            "local" => {
-                config::Config::builder().add_source(config::File::with_name("Settings.toml"))
-            }
-            _ => config::Config::builder().add_source(config::Environment::with_prefix("APP_").separator("_")),
-        }
-        .build()?
-        .try_deserialize::<Settings>()?,
-    )
+    let config = config::Config::builder()
+        .add_source(config::Environment::with_convert_case(Case::Snake))
+        .build()?;
+
+    Ok(config
+        .try_deserialize::<Settings>()?)
 }
